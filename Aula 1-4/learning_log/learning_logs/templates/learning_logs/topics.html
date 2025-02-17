@@ -1,11 +1,13 @@
 {% extends "learning_logs/base.html" %}
 
 {% block content %}
-    Tópicos:
+    <p>Tópicos: </p>
     <!-- tag 'ul': utilizada para criar listas não ordenadas dentro de uma página -->
     <ul>
         {% for topic in topics %}
-             <li> {{ topic }} </li>
+             <li> 
+                <a href="{% url 'topic' topic.id %}">{{ topic }}</a> 
+            </li>
         {% empty %}
             <li>Não há tópicos adicionados.</li>
         {% endfor %}
