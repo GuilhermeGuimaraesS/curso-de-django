@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
@@ -14,7 +14,7 @@ def index(request):
 @login_required
 def topics(request):
     """Mostra todos os assuntos."""
-    topics = Topic.objects.order_by('date_added')
+    topics = Topic.objects.filter(owner=request.user).order_by('date_added')
     context = {'topics': topics}
     return render(request, 'learning_logs/topics.html', context)
 
@@ -23,6 +23,11 @@ def topics(request):
 def topic(request, topic_id):
     """Mostra as informações sobre determinado assunto."""
     topic = Topic.objects.get(id = topic_id)
+
+    # Garante que o assunto pertence ao usuário atual
+    if topic.owner != request.user:
+        raise Http404
+
     entries = topic.entry_set.order_by('-date_added')
     context = {'topic': topic, 'entries': entries}
     return render(request, 'learning_logs/topic.html', context)
@@ -38,7 +43,11 @@ def new_topic(request):
         # Dados de POST enviados; processa os dados
         form = TopicForm(request.POST)
         if form.is_valid():
-            form.save()
+            
+            new_topic = form.save(commit=False)
+            # Garante que usuário atual será registrado como dono do novo tópico
+            new_topic.owner = request.user
+            new_topic.save()
             return HttpResponseRedirect(reverse('topics'))
 
     context = {'form': form}
@@ -49,6 +58,10 @@ def new_topic(request):
 def new_entry(request, topic_id):
     """Acresenta uma nova entrada para um assunto escolhido."""
     topic = Topic.objects.get(id=topic_id)
+
+    # Garante que o tópico pertence ao usuário atual
+    if topic.owner != request.user:
+        raise Http404
 
     if request.method != 'POST':
         # Nenhum dado enviado; cria um formulário em branco
@@ -71,6 +84,10 @@ def edit_entry(request, entry_id):
     """Edita uma entrada existente."""
     entry = Entry.objects.get(id=entry_id)
     topic = entry.topic
+
+    # Garante que o assunto pertence ao usuário atual
+    if topic.owner != request.user:
+        raise Http404
 
     if request.method != 'POST':
         # Requisição inicial; preenche previamente o formulário com a entrada atual.
