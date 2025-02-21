@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'learning_logs',
     'users',
+
+    # Apps de terceiros
+    'bootstrap3',
 ]
 
 MIDDLEWARE = [
@@ -78,12 +81,8 @@ WSGI_APPLICATION = 'learning_log.wsgi.application'
 
 DATABASES = {
    'default': {
-       'ENGINE': 'djongo',
-       'NAME': 'firstDjangoProject',
-       'ENFORCE_SCHEMA': False,
-       'CLIENT': {
-           'host': 'mongodb://localhost:27017/'
-       }
+       'ENGINE': 'django.db.backends.sqlite3',
+       'NAME': BASE_DIR / 'db.sqlite3',
    }
     
 }
@@ -132,3 +131,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL login page
 LOGIN_URL = '/users/login'
+
+# Bootstrap3
+BOOTSTRAP3 = {
+    'include_jquery': True,
+}
